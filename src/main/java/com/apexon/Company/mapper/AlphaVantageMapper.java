@@ -8,20 +8,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlphaVantageMapper {
-    public static List<AlphaVantageMatch> parseMatches(String json) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(json);
-        JsonNode matches = root.get("bestMatches");
-
+    public static List<AlphaVantageMatch> parseMatches(String json) {
         List<AlphaVantageMatch> result = new ArrayList<>();
-        for (JsonNode match : matches) {
-            AlphaVantageMatch dto = new AlphaVantageMatch();
-            dto.setSymbol(match.get("1. symbol").asText());
-            dto.setName(match.get("2. name").asText());
-            dto.setAssetType(match.get("3. type").asText());
-            dto.setExchange(match.get("4. region").asText()); // mapping 'region' as 'exchange'
-            result.add(dto);
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(json);
+            JsonNode matches = root.get("bestMatches");
+
+            if (matches != null && matches.isArray()) {
+                for (JsonNode match : matches) {
+                    AlphaVantageMatch dto = new AlphaVantageMatch();
+                    dto.setSymbol(match.get("1. symbol").asText());
+                    dto.setName(match.get("2. name").asText());
+                    dto.setAssetType(match.get("3. type").asText());
+                    dto.setCurrency(match.get("8. currency").asText());
+                    result.add(dto);
+                }
+            } else {
+                System.out.println("No 'bestMatches' found in response.");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to parse AlphaVantage JSON: " + e.getMessage());
+            e.printStackTrace();
         }
+
         return result;
     }
 }

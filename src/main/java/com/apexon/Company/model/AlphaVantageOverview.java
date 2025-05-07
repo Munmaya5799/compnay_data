@@ -6,6 +6,5 @@ public class AlphaVantageOverview {
     private String symbol;
     private String assetType;
     private String name;
-    private String exchange;
     private String currency;
 }
